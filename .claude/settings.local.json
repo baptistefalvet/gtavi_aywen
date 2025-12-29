@@ -1,0 +1,82 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git remote:*)",
+      "Skill(skill-creator)",
+      "Bash(find . -type f -name \"*.md\" -exec sh -c 'echo \"\"{}: $(wc -l < \"\"{}\"\")\"\" lines' ;)",
+      "Bash(tree:*)",
+      "Bash(echo:*)",
+      "Bash(source ~/.zshrc)",
+      "Skill(unity-core-guidelines)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:code.claude.com)",
+      "Skill(event-driven-architecture)",
+      "Bash(python3:*)",
+      "mcp__UnityMCP__batch_execute",
+      "mcp__UnityMCP__debug_request_context",
+      "mcp__UnityMCP__execute_custom_tool",
+      "mcp__UnityMCP__execute_menu_item",
+      "mcp__UnityMCP__find_in_file",
+      "mcp__UnityMCP__manage_asset",
+      "mcp__UnityMCP__manage_editor",
+      "mcp__UnityMCP__manage_gameobject",
+      "mcp__UnityMCP__manage_material",
+      "mcp__UnityMCP__manage_prefabs",
+      "mcp__UnityMCP__manage_scene",
+      "mcp__UnityMCP__apply_text_edits",
+      "mcp__UnityMCP__create_script",
+      "mcp__UnityMCP__delete_script",
+      "mcp__UnityMCP__validate_script",
+      "mcp__UnityMCP__manage_script",
+      "mcp__UnityMCP__manage_script_capabilities",
+      "mcp__UnityMCP__get_sha",
+      "mcp__UnityMCP__manage_shader",
+      "mcp__UnityMCP__read_console",
+      "mcp__UnityMCP__run_tests",
+      "mcp__UnityMCP__script_apply_edits",
+      "mcp__UnityMCP__set_active_instance",
+      "Skill(coding-guidelines)",
+      "Skill(coding-guidelines:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Glass.aiff"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Ping.aiff"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Ping.aiff"
+          }
+        ]
+      }
+    ]
+  }
+}
