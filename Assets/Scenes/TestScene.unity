@@ -1854,7 +1854,7 @@ Transform:
   m_GameObject: {fileID: 31499386}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -67.786194, y: 229.82117, z: 130.61913}
+  m_LocalPosition: {x: -67.786194, y: 147, z: 130.61913}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10077,7 +10077,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.LensFlareComponentSRP
   m_LensFlareData: {fileID: 11400000, guid: fa2a3b4a4d3251d4689a35806665f4e6, type: 2}
   version: 0
-  intensity: 1.9990325
+  intensity: 1.9990505
   maxAttenuationDistance: 100
   maxAttenuationScale: 100
   distanceAttenuationCurve:
@@ -18568,7 +18568,7 @@ Transform:
   m_GameObject: {fileID: 739999934}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -67.786194, y: 229.82117, z: 130.61913}
+  m_LocalPosition: {x: -67.786194, y: 252.82117, z: 130.61913}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -19636,7 +19636,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 67.786194, y: -576.5}
+  m_AnchoredPosition: {x: 67.786194, y: -466.59998}
   m_SizeDelta: {x: 900, y: 900}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &772319509
@@ -19703,14 +19703,18 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '<jump>Ici tu peux faire a peut pres tout ce que tu veux
+  m_text: 'Ici tu peux faire a peut pres tout ce que tu veux
 
-    fais toi
-    des potes
+    fais toi des potes
 
-    brises quelque regles
+    brises
+    quelque regles
 
-    Et <shake>eclate toi'
+    et <shake>ECLATE TOI</shake>
+
+
+    <jump>Appuie sur "Espace"
+    pour jouer'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b4b90eba85c5a824d8c0b9cf0407c733, type: 2}
   m_sharedMaterial: {fileID: 25239160824997503, guid: b4b90eba85c5a824d8c0b9cf0407c733, type: 2}
@@ -19776,7 +19780,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 767.40796}
+  m_margin: {x: 0, y: 0, z: -98.157745, w: 767.40796}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -25028,7 +25032,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 66.9, y: -580.9}
+  m_AnchoredPosition: {x: 66.9, y: -471}
   m_SizeDelta: {x: 900, y: 900}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &972426665
@@ -25380,6 +25384,52 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3837068017085330981, guid: b3d9d8b70f2e43a46be7089fb040fbad, type: 3}
   m_PrefabInstance: {fileID: 985116382}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &987685889
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 987685891}
+  - component: {fileID: 987685890}
+  m_Layer: 0
+  m_Name: UIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &987685890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 987685889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14c701f19135f4f43b3d65906ba553b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIManager
+  helperTextAnimator: {fileID: 1595474221}
+  triggerKey: 32
+--- !u!4 &987685891
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 987685889}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &988282571
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -70348,3 +70398,4 @@ SceneRoots:
   - {fileID: 1998889163}
   - {fileID: 1835236857}
   - {fileID: 1959955050}
+  - {fileID: 987685891}
