@@ -1,0 +1,290 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8248188132954609406
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
+  m_Name: Outline
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
+  m_Active: 1
+  injectionPoint: 450
+  fetchColorBuffer: 1
+  requirements: 0
+  passMaterial: {fileID: 2100000, guid: 63a84d7fd685c424dba784d16c4d1352, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
+--- !u!114 &-2851990019272085649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea2001c78c31f5a4a96c325eee9d7a5c, type: 3}
+  m_Name: SpeedLinesFeature
+  m_EditorClassIdentifier: Assembly-CSharp::SpeedLinesFeature
+  m_Active: 1
+  SpeedLinesShader: {fileID: -6465566751694194690, guid: df533f4d72c8f224eb614a3ca7b5d07e, type: 3}
+  injectionPoint: 550
+--- !u!114 &-2365353965454302510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c1c34126d0c3824cb7e942eb35d4fa6, type: 3}
+  m_Name: PhysicallyBasedSkyURP
+  m_EditorClassIdentifier: PBSkyURP::PhysicallyBasedSkyURP
+  m_Active: 1
+  m_Shader: {fileID: 4800000, guid: cba92fa286f80234db50615beb33eab2, type: 3}
+  m_LutShader: {fileID: 4800000, guid: b2d9c6e519415af43a8d8e54c3ca5a4d, type: 3}
+  m_Precomputation: 0
+  m_FallbackSkyMaterial: {fileID: 2100000, guid: 7c6697a3d51c9324c8e9ad3284a1ac04, type: 2}
+  m_VolumetricCloudsMaterial: {fileID: 0}
+--- !u!114 &-105952871462785256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4268db87361095c4ca643764150c94d6, type: 3}
+  m_Name: DepthPyramid
+  m_EditorClassIdentifier: Limworks.Graphics.URP.SSR::LimWorks.Rendering.URP.ScreenSpaceReflections.DepthPyramid
+  m_Active: 1
+  depthPyramidShader: {fileID: 7200000, guid: b2ead2c2a0fb2bc4d8ff715cbf4b0403, type: 3}
+  settings: {shader: {fileID: 7200000, guid: b2ead2c2a0fb2bc4d8ff715cbf4b0403, type: 3}, ShowDebug: 0, DebugSlice: 0, DebugMinMax: {x: 0, y: 0}}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de640fe3d0db1804a85f9fc8f5cadab6, type: 3}
+  m_Name: Renderer
+  m_EditorClassIdentifier: 
+  debugShaders:
+    debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7, type: 3}
+    hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
+    probeVolumeSamplingDebugComputeShader: {fileID: 7200000, guid: 53626a513ea68ce47b59dc1299fe3959, type: 3}
+  probeVolumeResources:
+    probeVolumeDebugShader: {fileID: 4800000, guid: e5c6678ed2aaa91408dd3df699057aae, type: 3}
+    probeVolumeFragmentationDebugShader: {fileID: 4800000, guid: 03cfc4915c15d504a9ed85ecc404e607, type: 3}
+    probeVolumeOffsetDebugShader: {fileID: 4800000, guid: 53a11f4ebaebf4049b3638ef78dc9664, type: 3}
+    probeVolumeSamplingDebugShader: {fileID: 4800000, guid: 8f96cd657dc40064aa21efcc7e50a2e7, type: 3}
+    probeSamplingDebugMesh: {fileID: -3555484719484374845, guid: 57d7c4c16e2765b47a4d2069b311bffe, type: 3}
+    probeSamplingDebugTexture: {fileID: 2800000, guid: 24ec0e140fb444a44ab96ee80844e18e, type: 3}
+    probeVolumeBlendStatesCS: {fileID: 7200000, guid: b9a23f869c4fd45f19c5ada54dd82176, type: 3}
+  m_RendererFeatures:
+  - {fileID: 4053265990933723430}
+  - {fileID: 6711475559785648591}
+  - {fileID: -2365353965454302510}
+  - {fileID: 6509223161562336495}
+  - {fileID: 1574309764530489177}
+  - {fileID: 8589771913816045030}
+  - {fileID: 2213579124389806122}
+  - {fileID: -8248188132954609406}
+  - {fileID: -2851990019272085649}
+  m_RendererFeatureMap: 26b9c691f1174038cf51bd7376f3235dd2e208c119932cdfef0cab64fa67555a59c744c96312d915e6f5a1880b0035772a80794f7c36b81e02e9a506988c888d6fef531e30b26bd8
+  m_UseNativeRenderPass: 1
+  xrSystemData: {fileID: 0}
+  postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
+  m_AssetVersion: 3
+  m_PrepassLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_OpaqueLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_TransparentLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_DefaultStencilState:
+    overrideStencilState: 0
+    stencilReference: 1
+    stencilCompareFunction: 3
+    passOperation: 2
+    failOperation: 0
+    zFailOperation: 0
+  m_ShadowTransparentReceive: 1
+  m_RenderingMode: 1
+  m_DepthPrimingMode: 0
+  m_CopyDepthMode: 0
+  m_DepthAttachmentFormat: 0
+  m_DepthTextureFormat: 0
+  m_AccurateGbufferNormals: 0
+  m_IntermediateTextureMode: 0
+--- !u!114 &1574309764530489177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4801988fff6bd6c4ba2cc47a52b88332, type: 3}
+  m_Name: ScreenSpaceGlobalIlluminationURP
+  m_EditorClassIdentifier: Assembly-CSharp::ScreenSpaceGlobalIlluminationURP
+  m_Active: 1
+  m_Shader: {fileID: 4800000, guid: 980a19a55859f6f4f87221175258eb92, type: 3}
+  m_RenderingDebugger: 0
+  m_ReflectionProbes: 1
+  m_HighQualityUpscaling: 1
+  m_OverrideAmbientLighting: 0
+  m_BackfaceLighting: 0
+--- !u!114 &2213579124389806122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ba570139520b754db174fd1ffd1c1fc, type: 3}
+  m_Name: FogPosterizationFeature
+  m_EditorClassIdentifier: Assembly-CSharp::FogPosterizationFeature
+  m_Active: 1
+  FogPosterizationShader: {fileID: -6465566751694194690, guid: 54984cdd1ff8ef248a50b3b9796b0c16, type: 3}
+  injectionPoint: 600
+--- !u!114 &4053265990933723430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f62c9c65cf3354c93be831c8bc075510, type: 3}
+  m_Name: ScreenSpaceAmbientOcclusion
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.ScreenSpaceAmbientOcclusion
+  m_Active: 1
+  m_Settings:
+    AOMethod: 1
+    Downsample: 0
+    AfterOpaque: 1
+    Source: 1
+    NormalSamples: 1
+    Intensity: 3
+    DirectLightingStrength: 0
+    Radius: 0.15
+    Samples: 0
+    BlurQuality: 0
+    Falloff: 100
+    SampleCount: -1
+--- !u!114 &4418068539280760864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a864f588276bab54f97335821add48a7, type: 3}
+  m_Name: LimSSR
+  m_EditorClassIdentifier: Limworks.Graphics.URP.SSR::LimWorks.Rendering.URP.ScreenSpaceReflections.LimSSR
+  m_Active: 1
+  Settings:
+    tracingMode: 1
+    stepStrideLength: 0.03
+    maxSteps: 128
+    downSample: 0
+    minSmoothness: 0
+    reflectSky: 1
+    ditherType: 1
+    SSR_Instance: {fileID: 0}
+    SSRShader: {fileID: 4800000, guid: 03f5601bba0a8034aa526644e8b9aaeb, type: 3}
+--- !u!114 &6509223161562336495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af24e90db4bf58443aff8888b8b7e207, type: 3}
+  m_Name: VolumetricCloudsURP
+  m_EditorClassIdentifier: VolumetricCloudsURP::VolumetricCloudsURP
+  m_Active: 1
+  material: {fileID: 2100000, guid: 3748131af20412e478461c6445c73923, type: 2}
+  renderingDebugger: 0
+  reflectionProbe: 0
+  resolutionScale: 1
+  upscaleMode: 0
+  preferredRenderMode: 0
+  ambientProbe: 1
+  sunAttenuation: 1
+  resetOnStart: 1
+  outputDepth: 1
+  depthTexture: 0
+--- !u!114 &6562227873478060613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87e97f534b7b5499ea80623ea9de3937, type: 3}
+  m_Name: VolumetricFogRendererFeature
+  m_EditorClassIdentifier: Assembly-CSharp::VolumetricFogRendererFeature
+  m_Active: 1
+  m_Material: {fileID: 0}
+  m_ApplyVRS: 0
+--- !u!114 &6711475559785648591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d69a19d29ef66464ea0afc7cd84fd6c2, type: 3}
+  m_Name: VolumetricFogRendererFeature
+  m_EditorClassIdentifier: com.cqf.urpvolumetricfog.runtime::VolumetricFogRendererFeature
+  m_Active: 1
+  downsampleDepthShader: {fileID: 4800000, guid: cffeaeec0396a2c4dad475266cc8dfeb, type: 3}
+  volumetricFogShader: {fileID: 4800000, guid: 08f816187f9af0244a95556ee0cab83f, type: 3}
+--- !u!114 &8589771913816045030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b00045f12942b46c698459096c89274e, type: 3}
+  m_Name: Posterization
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.FullScreenPassRendererFeature
+  m_Active: 1
+  injectionPoint: 600
+  fetchColorBuffer: 1
+  requirements: 0
+  passMaterial: {fileID: 2100000, guid: 41b7abe7947aef84f8710f61e428ca71, type: 2}
+  passIndex: 0
+  bindDepthStencilAttachment: 0
+  m_Version: 1
