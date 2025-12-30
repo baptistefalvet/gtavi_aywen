@@ -38,6 +38,9 @@ namespace GD3.GtaviAywen
         private float m_CurrentThrust;
         private bool m_IsActive;
 
+        private float m_TargetPitch;
+        private float m_TargetRoll;
+
         #endregion
 
         #region Unity Lifecycle
@@ -67,6 +70,9 @@ namespace GD3.GtaviAywen
 
             ApplyThrust();
             ApplyVerticalDamping();
+            UpdateTargetAttitude();
+            ApplyAttitudeControl();
+            ApplyYawControl();
         }
 
         #endregion
@@ -95,6 +101,7 @@ namespace GD3.GtaviAywen
             m_Rigidbody.useGravity = true;
             m_Rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
             m_Rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            m_Rigidbody.constraints = RigidbodyConstraints.None;
 
             LogDebug($"Rigidbody configured: mass={m_Rigidbody.mass}, drag={m_Rigidbody.linearDamping}");
         }
@@ -146,6 +153,128 @@ namespace GD3.GtaviAywen
 
         #endregion
 
+        #region Phase 2 - Attitude Control
+
+        /// <summary>
+        /// Updates target pitch and roll based on player input.
+        /// Handles mouse delta accumulation and keyboard held inputs differently.
+        /// </summary>
+        private void UpdateTargetAttitude()
+        {
+            float pitchInput = m_InputHandler != null ? m_InputHandler.PitchInput : 0f;
+            float rollInput = m_InputHandler != null ? m_InputHandler.RollInput : 0f;
+
+            // TODO: Re-enable mouse pitch control later
+            // Pitch control temporarily disabled
+            /*
+            if (Mathf.Abs(pitchInput) > 0.01f)
+            {
+                if (Mathf.Abs(pitchInput) < 0.5f)
+                {
+                    m_TargetPitch -= pitchInput * m_Settings.MousePitchSensitivity;
+                }
+                else
+                {
+                    m_TargetPitch = -pitchInput * m_Settings.MaxPitchDegrees;
+                }
+            }
+            else if (m_Settings.AutoLevelSpeed > 0f)
+            {
+                m_TargetPitch = Mathf.MoveTowards(m_TargetPitch, 0f, m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
+                if (Mathf.Abs(m_TargetPitch) < m_Settings.AutoLevelDeadzone)
+                {
+                    m_TargetPitch = 0f;
+                }
+            }
+            */
+
+            // Auto-level pitch when no input
+            if (m_Settings.AutoLevelSpeed > 0f)
+            {
+                m_TargetPitch = Mathf.MoveTowards(m_TargetPitch, 0f, m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
+                if (Mathf.Abs(m_TargetPitch) < m_Settings.AutoLevelDeadzone)
+                {
+                    m_TargetPitch = 0f;
+                }
+            }
+
+            if (Mathf.Abs(rollInput) > 0.01f)
+            {
+                m_TargetRoll = -rollInput * m_Settings.MaxRollDegrees;
+            }
+            else if (m_Settings.AutoLevelSpeed > 0f)
+            {
+                m_TargetRoll = Mathf.MoveTowards(m_TargetRoll, 0f, m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
+                if (Mathf.Abs(m_TargetRoll) < m_Settings.AutoLevelDeadzone)
+                {
+                    m_TargetRoll = 0f;
+                }
+            }
+
+            m_TargetPitch = Mathf.Clamp(m_TargetPitch, -m_Settings.MaxPitchDegrees, m_Settings.MaxPitchDegrees);
+            m_TargetRoll = Mathf.Clamp(m_TargetRoll, -m_Settings.MaxRollDegrees, m_Settings.MaxRollDegrees);
+        }
+
+        /// <summary>
+        /// Applies PD controller torques to achieve target pitch and roll.
+        /// Uses local-space torques for predictable behavior.
+        /// </summary>
+        private void ApplyAttitudeControl()
+        {
+            Vector3 currentEuler = transform.localEulerAngles;
+            float currentPitch = NormalizeAngle(currentEuler.x);
+            float currentRoll = NormalizeAngle(currentEuler.z);
+
+            Vector3 localAngularVelocity = transform.InverseTransformDirection(m_Rigidbody.angularVelocity);
+
+            float pitchError = m_TargetPitch - currentPitch;
+            float pitchTorque = pitchError * m_Settings.StabilizationP - localAngularVelocity.x * m_Settings.StabilizationD;
+
+            float rollError = m_TargetRoll - currentRoll;
+            float rollTorque = rollError * m_Settings.StabilizationP - localAngularVelocity.z * m_Settings.StabilizationD;
+
+            m_Rigidbody.AddRelativeTorque(pitchTorque, 0f, rollTorque, ForceMode.Acceleration);
+        }
+
+        /// <summary>
+        /// Applies yaw control (heading rotation).
+        /// Uses rate-based control with damping.
+        /// </summary>
+        private void ApplyYawControl()
+        {
+            float yawInput = m_InputHandler != null ? m_InputHandler.YawInput : 0f;
+
+            Vector3 localAngularVelocity = transform.InverseTransformDirection(m_Rigidbody.angularVelocity);
+            float currentYawRate = localAngularVelocity.y * Mathf.Rad2Deg;
+
+            float desiredYawRate = yawInput * m_Settings.YawRate;
+            float yawTorque;
+
+            if (Mathf.Abs(yawInput) > 0.01f)
+            {
+                float yawError = desiredYawRate - currentYawRate;
+                yawTorque = yawError * m_Settings.StabilizationP * 0.5f;
+            }
+            else
+            {
+                yawTorque = -currentYawRate * m_Settings.YawDamping;
+            }
+
+            m_Rigidbody.AddRelativeTorque(0f, yawTorque * Mathf.Deg2Rad, 0f, ForceMode.Acceleration);
+        }
+
+        /// <summary>
+        /// Normalizes an angle to the range [-180, 180] degrees.
+        /// </summary>
+        private float NormalizeAngle(float angle)
+        {
+            while (angle > 180f) angle -= 360f;
+            while (angle < -180f) angle += 360f;
+            return angle;
+        }
+
+        #endregion
+
         #region Debug
 
         private void LogDebug(string message)
@@ -170,6 +299,13 @@ namespace GD3.GtaviAywen
             float verticalSpeed = m_Rigidbody.linearVelocity.y;
             Gizmos.color = verticalSpeed > 0 ? Color.green : Color.yellow;
             Gizmos.DrawRay(transform.position, Vector3.up * verticalSpeed * 0.5f);
+
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawRay(transform.position, transform.forward * 2f);
+
+            Gizmos.color = Color.magenta;
+            Quaternion targetRotation = Quaternion.Euler(m_TargetPitch, transform.eulerAngles.y, m_TargetRoll);
+            Gizmos.DrawRay(transform.position, targetRotation * Vector3.up * 2f);
         }
 
         private void OnGUI()
@@ -180,12 +316,20 @@ namespace GD3.GtaviAywen
             float verticalSpeed = m_Rigidbody.linearVelocity.y;
             float horizontalSpeed = new Vector3(m_Rigidbody.linearVelocity.x, 0, m_Rigidbody.linearVelocity.z).magnitude;
 
-            GUILayout.BeginArea(new Rect(10, 10, 300, 150));
+            float currentPitch = NormalizeAngle(transform.localEulerAngles.x);
+            float currentRoll = NormalizeAngle(transform.localEulerAngles.z);
+            float currentYaw = transform.localEulerAngles.y;
+
+            GUILayout.BeginArea(new Rect(10, 10, 300, 220));
             GUILayout.Label("JETPACK DEBUG");
             GUILayout.Label($"Vertical Speed: {verticalSpeed:F2} m/s");
             GUILayout.Label($"Horizontal Speed: {horizontalSpeed:F2} m/s");
             GUILayout.Label($"Current Thrust: {m_CurrentThrust:F2} m/s2");
             GUILayout.Label($"Altitude: {transform.position.y:F2} m");
+            GUILayout.Label("--- ATTITUDE ---");
+            GUILayout.Label($"Pitch: {currentPitch:F1} (target: {m_TargetPitch:F1})");
+            GUILayout.Label($"Roll: {currentRoll:F1} (target: {m_TargetRoll:F1})");
+            GUILayout.Label($"Yaw: {currentYaw:F1}");
             GUILayout.EndArea();
         }
 
