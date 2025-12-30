@@ -169,6 +169,9 @@ namespace GD3.GtaviAywen
                 m_Animator.SetBool("Grounded", false);
             }
 
+            // Disable ThirdPersonCam BEFORE yield to prevent it from rotating player on next frame
+            m_PlayerCam.enabled = false;
+
             yield return null;
 
             transform.SetParent(jetpack.transform);
@@ -181,7 +184,6 @@ namespace GD3.GtaviAywen
             }
 
             jetpack.enabled = true;
-            m_PlayerCam.enabled = true;
 
             Debug.Log("[JetpackMount] Player mounted jetpack. Press F to dismount, Space to ascend, Ctrl to descend.");
 
@@ -235,6 +237,10 @@ namespace GD3.GtaviAywen
             if (m_PlayerWeaponController != null)
             {
                 m_PlayerWeaponController.enabled = true;
+            }
+            if (m_PlayerCam != null)
+            {
+                m_PlayerCam.enabled = true;
             }
 
             Debug.Log("[JetpackMount] Player dismounted jetpack.");

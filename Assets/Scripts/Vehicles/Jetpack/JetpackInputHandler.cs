@@ -70,6 +70,15 @@ namespace GD3.GtaviAywen
 
         #endregion
 
+        #region Input State (Phase 4)
+
+        /// <summary>
+        /// Strafe mode activation (true when Left Shift held).
+        /// </summary>
+        public bool StrafeModeActive { get; private set; }
+
+        #endregion
+
         #region Unity Lifecycle
 
         private void Awake()
@@ -82,6 +91,15 @@ namespace GD3.GtaviAywen
             if (m_InputActions == null) return;
             if (m_AscendAction == null) CacheInputActions();
             EnableInputActions();
+
+            // Clear any stale input state from before the jetpack was activated
+            AscendInput = 0f;
+            DescendInput = 0f;
+            MoveInput = Vector2.zero;
+            YawInput = 0f;
+            PitchInput = 0f;
+            RollInput = 0f;
+            StrafeModeActive = false;
         }
 
         private void OnDisable()
@@ -131,6 +149,7 @@ namespace GD3.GtaviAywen
             m_MoveAction?.Enable();
             m_YawAction?.Enable();
             m_PitchAction?.Enable();
+            m_StrafeModeAction?.Enable();
         }
 
         private void DisableInputActions()
@@ -140,6 +159,7 @@ namespace GD3.GtaviAywen
             m_MoveAction?.Disable();
             m_YawAction?.Disable();
             m_PitchAction?.Disable();
+            m_StrafeModeAction?.Disable();
         }
 
         #endregion
@@ -155,6 +175,9 @@ namespace GD3.GtaviAywen
             YawInput = m_YawAction?.ReadValue<float>() ?? 0f;
             PitchInput = m_PitchAction?.ReadValue<float>() ?? 0f;
             RollInput = MoveInput.x;
+
+            // Phase 4: Read strafe mode activation
+            StrafeModeActive = (m_StrafeModeAction?.ReadValue<float>() ?? 0f) > 0.5f;
         }
 
         #endregion

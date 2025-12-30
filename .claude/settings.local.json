@@ -42,7 +42,8 @@
       "Skill(coding-guidelines:*)",
       "Bash(cat:*)",
       "Bash(curl:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

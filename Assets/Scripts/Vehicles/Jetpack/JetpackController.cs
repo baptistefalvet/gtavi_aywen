@@ -17,6 +17,10 @@ namespace GD3.GtaviAywen
         [Header("Input")]
         [SerializeField] private JetpackInputHandler m_InputHandler;
 
+        [Header("Camera (Phase 4)")]
+        [Tooltip("Main camera for strafe mode. If null, uses Camera.main")]
+        [SerializeField] private Camera m_MainCamera;
+
         #endregion
 
         #region Cached Components
@@ -41,6 +45,11 @@ namespace GD3.GtaviAywen
         private float m_TargetPitch;
         private float m_TargetRoll;
 
+        // Phase 4 - Strafe Mode
+        private bool m_IsStrafeModeActive;
+        private Vector3 m_TargetStrafeVelocity;
+        private float m_CurrentYawVelocity;  // For SmoothDampAngle
+
         #endregion
 
         #region Unity Lifecycle
@@ -50,12 +59,29 @@ namespace GD3.GtaviAywen
             CacheComponents();
             ValidateReferences();
             ConfigureRigidbody();
+            CacheMainCamera();
         }
 
         private void OnEnable()
         {
             m_IsActive = true;
-            LogDebug("Jetpack activated");
+
+            // Reset all state variables to prevent stale values from previous activation
+            m_CurrentThrust = 0f;
+            m_TargetPitch = 0f;
+            m_TargetRoll = 0f;
+            m_IsStrafeModeActive = false;
+            m_TargetStrafeVelocity = Vector3.zero;
+            m_CurrentYawVelocity = 0f;
+
+            // Reset Rigidbody velocities to prevent inherited momentum (only if not kinematic)
+            if (m_Rigidbody != null && !m_Rigidbody.isKinematic)
+            {
+                m_Rigidbody.linearVelocity = Vector3.zero;
+                m_Rigidbody.angularVelocity = Vector3.zero;
+            }
+
+            LogDebug("Jetpack activated - state reset");
         }
 
         private void OnDisable()
@@ -68,9 +94,20 @@ namespace GD3.GtaviAywen
         {
             if (!m_IsActive || m_Settings == null) return;
 
+            UpdateStrafeModeState();
+
             ApplyThrust();
             ApplyVerticalDamping();
-            ApplyHorizontalDamping();
+
+            if (m_IsStrafeModeActive)
+            {
+                ApplyStrafeModePhysics();
+            }
+            else
+            {
+                ApplyHorizontalDamping();
+            }
+
             UpdateTargetAttitude();
             ApplyAttitudeControl();
             ApplyYawControl();
@@ -105,6 +142,18 @@ namespace GD3.GtaviAywen
             m_Rigidbody.constraints = RigidbodyConstraints.None;
 
             LogDebug($"Rigidbody configured: mass={m_Rigidbody.mass}, drag={m_Rigidbody.linearDamping}");
+        }
+
+        private void CacheMainCamera()
+        {
+            if (m_MainCamera == null)
+            {
+                m_MainCamera = Camera.main;
+                if (m_MainCamera == null)
+                {
+                    Debug.LogWarning("[JetpackController] Camera not found! Strafe mode disabled.");
+                }
+            }
         }
 
         #endregion
@@ -167,56 +216,75 @@ namespace GD3.GtaviAywen
 
         /// <summary>
         /// Updates target pitch and roll based on player input.
-        /// Phase 3: W/S keyboard controls pitch, A/D controls roll.
+        /// Phase 3: W/S keyboard controls pitch, A/D controls roll (Normal mode).
+        /// Phase 4: Strong upright stabilization in strafe mode.
         /// </summary>
         private void UpdateTargetAttitude()
         {
-            float pitchInput = m_InputHandler != null ? m_InputHandler.PitchInput : 0f;
-            float rollInput = m_InputHandler != null ? m_InputHandler.RollInput : 0f;
-            Vector2 moveInput = m_InputHandler != null ? m_InputHandler.MoveInput : Vector2.zero;
-
-            // Phase 3: W/S keyboard input controls pitch target
-            if (Mathf.Abs(moveInput.y) > 0.01f)
+            if (m_IsStrafeModeActive)
             {
-                // Negate moveInput.y: W key = -1 → negative pitch (forward tilt)
-                m_TargetPitch = -moveInput.y * m_Settings.MaxPitchDegrees;
+                // Strafe mode: force upright with aggressive auto-level
+                float autoLevelRate = m_Settings.AutoLevelSpeed * m_Settings.StrafeStabilizationMultiplier;
+
+                m_TargetPitch = Mathf.MoveTowards(m_TargetPitch, 0f, autoLevelRate * Time.fixedDeltaTime);
+                m_TargetRoll = Mathf.MoveTowards(m_TargetRoll, 0f, autoLevelRate * Time.fixedDeltaTime);
+
+                if (Mathf.Abs(m_TargetPitch) < m_Settings.AutoLevelDeadzone)
+                    m_TargetPitch = 0f;
+                if (Mathf.Abs(m_TargetRoll) < m_Settings.AutoLevelDeadzone)
+                    m_TargetRoll = 0f;
             }
             else
             {
-                // Auto-level pitch when no W/S input
-                if (m_Settings.AutoLevelSpeed > 0f)
+                // Normal mode: existing Phase 3 behavior
+                float pitchInput = m_InputHandler != null ? m_InputHandler.PitchInput : 0f;
+                float rollInput = m_InputHandler != null ? m_InputHandler.RollInput : 0f;
+                Vector2 moveInput = m_InputHandler != null ? m_InputHandler.MoveInput : Vector2.zero;
+
+                // Phase 3: W/S keyboard input controls pitch target
+                if (Mathf.Abs(moveInput.y) > 0.01f)
                 {
-                    m_TargetPitch = Mathf.MoveTowards(m_TargetPitch, 0f,
-                        m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
-                    if (Mathf.Abs(m_TargetPitch) < m_Settings.AutoLevelDeadzone)
+                    // Negate moveInput.y: W key = -1 → negative pitch (forward tilt)
+                    m_TargetPitch = -moveInput.y * m_Settings.MaxPitchDegrees;
+                }
+                else
+                {
+                    // Auto-level pitch when no W/S input
+                    if (m_Settings.AutoLevelSpeed > 0f)
                     {
-                        m_TargetPitch = 0f;
+                        m_TargetPitch = Mathf.MoveTowards(m_TargetPitch, 0f,
+                            m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
+                        if (Mathf.Abs(m_TargetPitch) < m_Settings.AutoLevelDeadzone)
+                        {
+                            m_TargetPitch = 0f;
+                        }
                     }
                 }
-            }
 
-            // Roll control from A/D keys
-            if (Mathf.Abs(rollInput) > 0.01f)
-            {
-                m_TargetRoll = -rollInput * m_Settings.MaxRollDegrees;
-            }
-            else if (m_Settings.AutoLevelSpeed > 0f)
-            {
-                m_TargetRoll = Mathf.MoveTowards(m_TargetRoll, 0f,
-                    m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
-                if (Mathf.Abs(m_TargetRoll) < m_Settings.AutoLevelDeadzone)
+                // Roll control from A/D keys
+                if (Mathf.Abs(rollInput) > 0.01f)
                 {
-                    m_TargetRoll = 0f;
+                    m_TargetRoll = -rollInput * m_Settings.MaxRollDegrees;
                 }
-            }
+                else if (m_Settings.AutoLevelSpeed > 0f)
+                {
+                    m_TargetRoll = Mathf.MoveTowards(m_TargetRoll, 0f,
+                        m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
+                    if (Mathf.Abs(m_TargetRoll) < m_Settings.AutoLevelDeadzone)
+                    {
+                        m_TargetRoll = 0f;
+                    }
+                }
 
-            m_TargetPitch = Mathf.Clamp(m_TargetPitch, -m_Settings.MaxPitchDegrees, m_Settings.MaxPitchDegrees);
-            m_TargetRoll = Mathf.Clamp(m_TargetRoll, -m_Settings.MaxRollDegrees, m_Settings.MaxRollDegrees);
+                m_TargetPitch = Mathf.Clamp(m_TargetPitch, -m_Settings.MaxPitchDegrees, m_Settings.MaxPitchDegrees);
+                m_TargetRoll = Mathf.Clamp(m_TargetRoll, -m_Settings.MaxRollDegrees, m_Settings.MaxRollDegrees);
+            }
         }
 
         /// <summary>
         /// Applies PD controller torques to achieve target pitch and roll.
         /// Uses local-space torques for predictable behavior.
+        /// Phase 4: Increased stabilization gains in strafe mode.
         /// </summary>
         private void ApplyAttitudeControl()
         {
@@ -226,11 +294,21 @@ namespace GD3.GtaviAywen
 
             Vector3 localAngularVelocity = transform.InverseTransformDirection(m_Rigidbody.angularVelocity);
 
+            // Phase 4: Apply stronger gains in strafe mode
+            float pGain = m_Settings.StabilizationP;
+            float dGain = m_Settings.StabilizationD;
+
+            if (m_IsStrafeModeActive)
+            {
+                pGain *= m_Settings.StrafeStabilizationMultiplier;
+                dGain *= m_Settings.StrafeStabilizationMultiplier;
+            }
+
             float pitchError = m_TargetPitch - currentPitch;
-            float pitchTorque = pitchError * m_Settings.StabilizationP - localAngularVelocity.x * m_Settings.StabilizationD;
+            float pitchTorque = pitchError * pGain - localAngularVelocity.x * dGain;
 
             float rollError = m_TargetRoll - currentRoll;
-            float rollTorque = rollError * m_Settings.StabilizationP - localAngularVelocity.z * m_Settings.StabilizationD;
+            float rollTorque = rollError * pGain - localAngularVelocity.z * dGain;
 
             m_Rigidbody.AddRelativeTorque(pitchTorque, 0f, rollTorque, ForceMode.Acceleration);
         }
@@ -238,9 +316,13 @@ namespace GD3.GtaviAywen
         /// <summary>
         /// Applies yaw control (heading rotation).
         /// Uses rate-based control with damping.
+        /// Phase 4: Disabled in strafe mode (facing follows camera instead).
         /// </summary>
         private void ApplyYawControl()
         {
+            // Disable manual yaw control in strafe mode (camera controls facing)
+            if (m_IsStrafeModeActive) return;
+
             float yawInput = m_InputHandler != null ? m_InputHandler.YawInput : 0f;
 
             Vector3 localAngularVelocity = transform.InverseTransformDirection(m_Rigidbody.angularVelocity);
@@ -270,6 +352,105 @@ namespace GD3.GtaviAywen
             while (angle > 180f) angle -= 360f;
             while (angle < -180f) angle += 360f;
             return angle;
+        }
+
+        #endregion
+
+        #region Phase 4 - Strafe Mode
+
+        /// <summary>
+        /// Updates strafe mode activation state based on input.
+        /// </summary>
+        private void UpdateStrafeModeState()
+        {
+            bool previousState = m_IsStrafeModeActive;
+            m_IsStrafeModeActive = m_InputHandler != null && m_InputHandler.StrafeModeActive;
+
+            if (m_IsStrafeModeActive && !previousState)
+            {
+                LogDebug("Strafe mode ACTIVATED");
+            }
+            else if (!m_IsStrafeModeActive && previousState)
+            {
+                LogDebug("Strafe mode DEACTIVATED");
+            }
+        }
+
+        /// <summary>
+        /// Applies camera-relative velocity control and facing direction in strafe mode.
+        /// </summary>
+        private void ApplyStrafeModePhysics()
+        {
+            if (m_MainCamera == null) return;
+
+            CalculateStrafeTargetVelocity();
+            ApplyStrafeVelocityControl();
+            UpdateStrafeFacingDirection();
+        }
+
+        /// <summary>
+        /// Calculates target horizontal velocity from camera-relative input.
+        /// </summary>
+        private void CalculateStrafeTargetVelocity()
+        {
+            Vector2 moveInput = m_InputHandler != null ? m_InputHandler.MoveInput : Vector2.zero;
+
+            // Project camera directions onto horizontal plane
+            Vector3 cameraForward = Vector3.ProjectOnPlane(m_MainCamera.transform.forward, Vector3.up).normalized;
+            Vector3 cameraRight = Vector3.ProjectOnPlane(m_MainCamera.transform.right, Vector3.up).normalized;
+
+            // Calculate target velocity from camera-relative input
+            m_TargetStrafeVelocity = (cameraForward * moveInput.y + cameraRight * moveInput.x)
+                                      * m_Settings.StrafeMaxSpeed;
+        }
+
+        /// <summary>
+        /// Applies forces to reach target strafe velocity with high accel/braking.
+        /// </summary>
+        private void ApplyStrafeVelocityControl()
+        {
+            // Get current horizontal velocity
+            Vector3 currentHorizontalVel = new Vector3(m_Rigidbody.linearVelocity.x, 0f, m_Rigidbody.linearVelocity.z);
+
+            // Calculate velocity error
+            Vector3 velocityError = m_TargetStrafeVelocity - currentHorizontalVel;
+
+            // Determine acceleration: high accel when input present, high braking when released
+            Vector2 moveInput = m_InputHandler != null ? m_InputHandler.MoveInput : Vector2.zero;
+            bool hasInput = moveInput.magnitude > 0.01f;
+            float accelRate = hasInput ? m_Settings.StrafeAccel : m_Settings.StrafeBraking;
+
+            // Clamp force to acceleration limit (prevents overshoot)
+            Vector3 controlForce = Vector3.ClampMagnitude(velocityError, accelRate);
+
+            // Apply acceleration force
+            m_Rigidbody.AddForce(controlForce, ForceMode.Acceleration);
+
+            // Apply additional damping for stability
+            Vector3 dampingForce = -currentHorizontalVel * m_Settings.StrafeDamping;
+            m_Rigidbody.AddForce(dampingForce, ForceMode.Acceleration);
+        }
+
+        /// <summary>
+        /// Smoothly rotates jetpack facing to match camera yaw direction.
+        /// </summary>
+        private void UpdateStrafeFacingDirection()
+        {
+            // Get camera yaw (horizontal rotation only)
+            float cameraYaw = m_MainCamera.transform.eulerAngles.y;
+
+            // Smoothly rotate toward camera yaw
+            float currentYaw = transform.eulerAngles.y;
+            float smoothedYaw = Mathf.SmoothDampAngle(
+                currentYaw,
+                cameraYaw,
+                ref m_CurrentYawVelocity,
+                m_Settings.StrafeFacingSmoothTime
+            );
+
+            // Apply rotation (preserve pitch/roll from attitude control)
+            Vector3 currentEuler = transform.eulerAngles;
+            transform.eulerAngles = new Vector3(currentEuler.x, smoothedYaw, currentEuler.z);
         }
 
         #endregion
@@ -305,6 +486,13 @@ namespace GD3.GtaviAywen
             Gizmos.color = Color.magenta;
             Quaternion targetRotation = Quaternion.Euler(m_TargetPitch, transform.eulerAngles.y, m_TargetRoll);
             Gizmos.DrawRay(transform.position, targetRotation * Vector3.up * 2f);
+
+            // Phase 4: Target strafe velocity (white)
+            if (m_IsStrafeModeActive)
+            {
+                Gizmos.color = Color.white;
+                Gizmos.DrawRay(transform.position, m_TargetStrafeVelocity * 0.5f);
+            }
         }
 
         private void OnGUI()
@@ -321,7 +509,7 @@ namespace GD3.GtaviAywen
 
             Vector2 moveInput = m_InputHandler != null ? m_InputHandler.MoveInput : Vector2.zero;
 
-            GUILayout.BeginArea(new Rect(10, 10, 300, 260));
+            GUILayout.BeginArea(new Rect(10, 10, 300, 310));
             GUILayout.Label("JETPACK DEBUG");
             GUILayout.Label($"Vertical Speed: {verticalSpeed:F2} m/s");
             GUILayout.Label($"Horizontal Speed: {horizontalSpeed:F2} m/s");
@@ -333,6 +521,13 @@ namespace GD3.GtaviAywen
             GUILayout.Label($"Yaw: {currentYaw:F1}°");
             GUILayout.Label("--- INPUT ---");
             GUILayout.Label($"Move: ({moveInput.x:F2}, {moveInput.y:F2})");
+            GUILayout.Label("--- STRAFE MODE ---");
+            GUILayout.Label($"Active: {(m_IsStrafeModeActive ? "YES" : "NO")}");
+            if (m_IsStrafeModeActive)
+            {
+                GUILayout.Label($"Target Vel: {m_TargetStrafeVelocity.magnitude:F2} m/s");
+                GUILayout.Label($"Camera Yaw: {(m_MainCamera != null ? m_MainCamera.transform.eulerAngles.y : 0f):F1}°");
+            }
             GUILayout.EndArea();
         }
 

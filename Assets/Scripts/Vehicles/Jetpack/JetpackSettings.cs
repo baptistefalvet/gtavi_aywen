@@ -62,6 +62,29 @@ namespace GD3.GtaviAywen
 
         #endregion
 
+        #region Phase 4 - Strafe Mode Settings
+
+        [Header("Strafe Mode")]
+        [Tooltip("Maximum horizontal speed in strafe mode (m/s)")]
+        [SerializeField] private float m_StrafeMaxSpeed = 15f;
+
+        [Tooltip("Acceleration rate in strafe mode (m/s²)")]
+        [SerializeField] private float m_StrafeAccel = 25f;
+
+        [Tooltip("Braking deceleration when input released (m/s²)")]
+        [SerializeField] private float m_StrafeBraking = 40f;
+
+        [Tooltip("Additional horizontal damping in strafe mode")]
+        [SerializeField] private float m_StrafeDamping = 2f;
+
+        [Tooltip("Smoothing time for facing direction (seconds)")]
+        [SerializeField, Range(0.05f, 1f)] private float m_StrafeFacingSmoothTime = 0.2f;
+
+        [Tooltip("Strafe mode stabilization multiplier")]
+        [SerializeField, Range(1f, 3f)] private float m_StrafeStabilizationMultiplier = 2f;
+
+        #endregion
+
         #region Public Properties
 
         public float ThrustPower => m_ThrustPower;
@@ -78,6 +101,14 @@ namespace GD3.GtaviAywen
         public float AutoLevelSpeed => m_AutoLevelSpeed;
         public float AutoLevelDeadzone => m_AutoLevelDeadzone;
         public float MousePitchSensitivity => m_MousePitchSensitivity;
+
+        // Phase 4 - Strafe Mode
+        public float StrafeMaxSpeed => m_StrafeMaxSpeed;
+        public float StrafeAccel => m_StrafeAccel;
+        public float StrafeBraking => m_StrafeBraking;
+        public float StrafeDamping => m_StrafeDamping;
+        public float StrafeFacingSmoothTime => m_StrafeFacingSmoothTime;
+        public float StrafeStabilizationMultiplier => m_StrafeStabilizationMultiplier;
 
         #endregion
     }
