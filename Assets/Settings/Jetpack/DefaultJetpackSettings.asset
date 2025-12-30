@@ -14,4 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GD3.GtaviAywen.JetpackSettings
   m_ThrustPower: 15
   m_VerticalDamping: 2
+  m_HorizontalDamping: 0.65
   m_GravityCompensationFactor: 1
+  m_MaxPitchDegrees: 30
+  m_MaxRollDegrees: 25
+  m_YawRate: 90
+  m_YawDamping: 3
+  m_StabilizationP: 10
+  m_StabilizationD: 5
+  m_AutoLevelSpeed: 3
+  m_AutoLevelDeadzone: 1
+  m_MousePitchSensitivity: 50

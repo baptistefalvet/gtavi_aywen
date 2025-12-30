@@ -70,6 +70,7 @@ namespace GD3.GtaviAywen
 
             ApplyThrust();
             ApplyVerticalDamping();
+            ApplyHorizontalDamping();
             UpdateTargetAttitude();
             ApplyAttitudeControl();
             ApplyYawControl();
@@ -151,60 +152,58 @@ namespace GD3.GtaviAywen
             m_Rigidbody.AddForce(Vector3.up * dampingForce, ForceMode.Acceleration);
         }
 
+        private void ApplyHorizontalDamping()
+        {
+            // Dampen horizontal velocity to prevent drift
+            Vector3 horizontalVelocity = new Vector3(m_Rigidbody.linearVelocity.x, 0f, m_Rigidbody.linearVelocity.z);
+            Vector3 dampingForce = -horizontalVelocity * m_Settings.HorizontalDamping;
+
+            m_Rigidbody.AddForce(dampingForce, ForceMode.Acceleration);
+        }
+
         #endregion
 
         #region Phase 2 - Attitude Control
 
         /// <summary>
         /// Updates target pitch and roll based on player input.
-        /// Handles mouse delta accumulation and keyboard held inputs differently.
+        /// Phase 3: W/S keyboard controls pitch, A/D controls roll.
         /// </summary>
         private void UpdateTargetAttitude()
         {
             float pitchInput = m_InputHandler != null ? m_InputHandler.PitchInput : 0f;
             float rollInput = m_InputHandler != null ? m_InputHandler.RollInput : 0f;
+            Vector2 moveInput = m_InputHandler != null ? m_InputHandler.MoveInput : Vector2.zero;
 
-            // TODO: Re-enable mouse pitch control later
-            // Pitch control temporarily disabled
-            /*
-            if (Mathf.Abs(pitchInput) > 0.01f)
+            // Phase 3: W/S keyboard input controls pitch target
+            if (Mathf.Abs(moveInput.y) > 0.01f)
             {
-                if (Mathf.Abs(pitchInput) < 0.5f)
-                {
-                    m_TargetPitch -= pitchInput * m_Settings.MousePitchSensitivity;
-                }
-                else
-                {
-                    m_TargetPitch = -pitchInput * m_Settings.MaxPitchDegrees;
-                }
+                // Negate moveInput.y: W key = -1 → negative pitch (forward tilt)
+                m_TargetPitch = -moveInput.y * m_Settings.MaxPitchDegrees;
             }
-            else if (m_Settings.AutoLevelSpeed > 0f)
+            else
             {
-                m_TargetPitch = Mathf.MoveTowards(m_TargetPitch, 0f, m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
-                if (Mathf.Abs(m_TargetPitch) < m_Settings.AutoLevelDeadzone)
+                // Auto-level pitch when no W/S input
+                if (m_Settings.AutoLevelSpeed > 0f)
                 {
-                    m_TargetPitch = 0f;
-                }
-            }
-            */
-
-            // Auto-level pitch when no input
-            if (m_Settings.AutoLevelSpeed > 0f)
-            {
-                m_TargetPitch = Mathf.MoveTowards(m_TargetPitch, 0f, m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
-                if (Mathf.Abs(m_TargetPitch) < m_Settings.AutoLevelDeadzone)
-                {
-                    m_TargetPitch = 0f;
+                    m_TargetPitch = Mathf.MoveTowards(m_TargetPitch, 0f,
+                        m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
+                    if (Mathf.Abs(m_TargetPitch) < m_Settings.AutoLevelDeadzone)
+                    {
+                        m_TargetPitch = 0f;
+                    }
                 }
             }
 
+            // Roll control from A/D keys
             if (Mathf.Abs(rollInput) > 0.01f)
             {
                 m_TargetRoll = -rollInput * m_Settings.MaxRollDegrees;
             }
             else if (m_Settings.AutoLevelSpeed > 0f)
             {
-                m_TargetRoll = Mathf.MoveTowards(m_TargetRoll, 0f, m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
+                m_TargetRoll = Mathf.MoveTowards(m_TargetRoll, 0f,
+                    m_Settings.AutoLevelSpeed * Time.fixedDeltaTime);
                 if (Mathf.Abs(m_TargetRoll) < m_Settings.AutoLevelDeadzone)
                 {
                     m_TargetRoll = 0f;
@@ -320,16 +319,20 @@ namespace GD3.GtaviAywen
             float currentRoll = NormalizeAngle(transform.localEulerAngles.z);
             float currentYaw = transform.localEulerAngles.y;
 
-            GUILayout.BeginArea(new Rect(10, 10, 300, 220));
+            Vector2 moveInput = m_InputHandler != null ? m_InputHandler.MoveInput : Vector2.zero;
+
+            GUILayout.BeginArea(new Rect(10, 10, 300, 260));
             GUILayout.Label("JETPACK DEBUG");
             GUILayout.Label($"Vertical Speed: {verticalSpeed:F2} m/s");
             GUILayout.Label($"Horizontal Speed: {horizontalSpeed:F2} m/s");
             GUILayout.Label($"Current Thrust: {m_CurrentThrust:F2} m/s2");
             GUILayout.Label($"Altitude: {transform.position.y:F2} m");
             GUILayout.Label("--- ATTITUDE ---");
-            GUILayout.Label($"Pitch: {currentPitch:F1} (target: {m_TargetPitch:F1})");
-            GUILayout.Label($"Roll: {currentRoll:F1} (target: {m_TargetRoll:F1})");
-            GUILayout.Label($"Yaw: {currentYaw:F1}");
+            GUILayout.Label($"Pitch: {currentPitch:F1}° (target: {m_TargetPitch:F1}°)");
+            GUILayout.Label($"Roll: {currentRoll:F1}° (target: {m_TargetRoll:F1}°)");
+            GUILayout.Label($"Yaw: {currentYaw:F1}°");
+            GUILayout.Label("--- INPUT ---");
+            GUILayout.Label($"Move: ({moveInput.x:F2}, {moveInput.y:F2})");
             GUILayout.EndArea();
         }
 

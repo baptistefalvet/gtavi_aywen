@@ -21,6 +21,9 @@ namespace GD3.GtaviAywen
         [Tooltip("Multiplier for gravity compensation (1.0 = full compensation)")]
         [SerializeField, Range(0.5f, 1.5f)] private float m_GravityCompensationFactor = 1.0f;
 
+        [Tooltip("Horizontal movement damping (lower = faster terminal velocity)")]
+        [SerializeField] private float m_HorizontalDamping = 0.65f;
+
         #endregion
 
         #region Phase 2 - Attitude Control Settings
@@ -63,6 +66,7 @@ namespace GD3.GtaviAywen
 
         public float ThrustPower => m_ThrustPower;
         public float VerticalDamping => m_VerticalDamping;
+        public float HorizontalDamping => m_HorizontalDamping;
         public float GravityCompensationFactor => m_GravityCompensationFactor;
 
         public float MaxPitchDegrees => m_MaxPitchDegrees;
