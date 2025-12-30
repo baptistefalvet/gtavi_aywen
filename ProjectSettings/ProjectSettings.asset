@@ -924,11 +924,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: e6a054b3-839e-4e2a-b839-02eab1db45ca
+  cloudProjectId: dfa08ebf-e8a0-4ebd-983a-050e61b0428c
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: Grand Tricky Adventure 6 (Concept Aywen)
-  organizationId: yanis2010anas
+  organizationId: unity_3rdvy9ptuoo43a
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
